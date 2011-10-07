@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<gadget>
+  <name>SEPTA Arrivals</name>
+  <version>0.1.1</version>
+  <author name="Joseph R. Tricarico">
+    <info url="keystonegeo.com" />
+  </author>
+  <copyright>&#169;2011 Keystone Geographics, Philadelphia, PA</copyright>
+  <description>Realtime SEPTA train arrivals</description>
+  <hosts>
+    <host name="sidebar">
+      <base type="HTML" apiVersion="1.0.0" src="Septa.html" />
+      <permissions>Full</permissions>
+      <platform minPlatformVersion="1.0" />
+    </host>
+  </hosts>
+</gadget>

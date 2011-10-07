@@ -1,0 +1,126 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=Unicode" />
+        <title>SEPTA Arrivals</title>
+        <style type="text/css">
+        body
+        {
+            margin: 0;
+            width: 130px;
+            height: 200px;
+            font-family: verdana;
+            font-size: 12px;
+        }
+        #gadgetContent
+        {
+            /*margin-top: 20px;*/
+            width: 130px;
+			height:100%;
+            vertical-align: middle;
+            text-align: left;
+            overflow: hidden;
+			background: white;
+        }
+		.copyright
+		{
+			font-size: 9px;
+		}
+        </style>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"></script>
+        <script type="text/jscript" language="jscript">
+            // Initialize the gadget.
+            
+			function init()
+            {
+                var oBackground = document.getElementById("imgBackground");
+                //oBackground.src = "url(images/septa.gif)";
+            }
+			
+			$( function() {
+			  var update = function() {
+			    var container = $('#target');
+			    container.attr('tabIndex','-1');
+				var url = 'http://www3.septa.org/sms/2';
+				var msg = '';
+				doAjax(url,msg,container);
+			  }
+			  
+			  update();
+			  
+			  //JSON functions written by Christian Heilmann.
+			  function doAjax(url,msg,container){
+				// if the URL starts with http
+				if(url.match('^http')){
+				  // assemble the YQL call
+				  $.getJSON("http://query.yahooapis.com/v1/public/yql?"+
+							"q=select%20*%20from%20html%20where%20url%3D%22"+
+							encodeURIComponent(url)+
+							"%22&format=xml'&callback=?",
+					function(data){
+					  if(data.results[0]){
+						var data = filterData(data.results[0]);
+						container.html(data);
+					  } else {
+						var errormsg = '<p>Error: could not load the page.</p>';
+						container.
+						  html(errormsg).
+							focus().
+							  effect('highlight',{color:'#c00'},1000);
+					  }
+					}
+				  );
+				} else {
+				  $.ajax({
+					url: url,
+					timeout:5000,
+					success: function(data){
+					  container.
+						html(data).
+						  focus().
+							effect("highlight",{},1000);
+					},
+					error: function(req,error){
+					  if(error === 'error'){error = req.statusText;}
+					  var errormsg = 'There was a communication error: '+error;
+						container.
+						  html(errormsg).
+							focus().
+							  effect('highlight',{color:'#c00'},1000);
+					},
+					beforeSend: function(data){
+					}
+				  });
+				}
+			  }
+			  function filterData(data){
+				// filter all the nasties out
+				// no body tags
+				//data = data.replace(/<?\/body[^>]*>/g,'');
+				// no linebreaks
+				data = data.replace(/[\r|\n]+/g,'');
+				// no comments
+				data = data.replace(/<--[\S\s]*?-->/g,'');
+				// no noscript blocks
+				data = data.replace(/<noscript[^>]*>[\S\s]*?<\/noscript>/g,'');
+				// no script blocks
+				data = data.replace(/<script[^>]*>[\S\s]*?<\/script>/g,'');
+				// no self closing scripts
+				data = data.replace(/<script.*\/>/,'');
+				// [... add as needed ...]
+				return data;
+			  }
+			});	
+        </script>
+    </head>
+	
+    <body onload="init()">
+        <g:background id="imgBackground">
+            <div id="gadgetContent">
+				<div id="target"></div>
+				<!--
+				<div class="copyright">&copy;2011 <a href="http://tricari.co/">Joseph Tricarico</a></div>
+				-->
+			</div>
+        </g:background>
+    </body>
+</html>
