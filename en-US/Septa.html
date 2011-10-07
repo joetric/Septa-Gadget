@@ -9,7 +9,7 @@
             width: 130px;
             height: 200px;
             font-family: verdana;
-            font-size: 12px;
+            font-size: 11px;
         }
         #gadgetContent
         {
@@ -25,6 +25,22 @@
 		{
 			font-size: 9px;
 		}
+		h3
+		{
+			font-size:11px;
+			display:block;
+			background:black;
+			width:100%;
+			color:white;
+			padding:2px;
+			margin:0;
+			
+		}
+		h4{
+			font-size:11px;
+			margin:6px 0 0;
+		}
+		
         </style>
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"></script>
         <script type="text/jscript" language="jscript">
@@ -37,14 +53,15 @@
             }
 			
 			$( function() {
-			  var update = function() {
+			  update = function() {
 			    var container = $('#target');
 			    container.attr('tabIndex','-1');
 				var url = 'http://www3.septa.org/sms/2';
 				var msg = '';
 				doAjax(url,msg,container);
+				//set delay to update again
+				//setTimeout("update();",1800000);//30 mins for now
 			  }
-			  
 			  update();
 			  
 			  //JSON functions written by Christian Heilmann.
@@ -52,6 +69,10 @@
 				// if the URL starts with http
 				if(url.match('^http')){
 				  // assemble the YQL call
+				  encodedCall = "http://query.yahooapis.com/v1/public/yql?"+
+							"q=select%20*%20from%20html%20where%20url%3D%22"+
+							encodeURIComponent(url)+
+							"%22&format=xml'&callback=?";
 				  $.getJSON("http://query.yahooapis.com/v1/public/yql?"+
 							"q=select%20*%20from%20html%20where%20url%3D%22"+
 							encodeURIComponent(url)+
@@ -59,13 +80,18 @@
 					function(data){
 					  if(data.results[0]){
 						var data = filterData(data.results[0]);
+						data = "<h3>" + data;
+						pattCloseTitle = new RegExp("Outbound|Inbound|Rt.");
+						firstFound = pattCloseTitle.exec(data);
+						data = data.replace(pattCloseTitle,'</h3>\n' + firstFound);
+						data = data.replace(/Inbound/g,'<h4>Inbound</h4>');
+						data = data.replace(/Outbound/g,'<h4>Outbound</h4>');
+						data = data.replace(/a /g,'a<br/>');
+						data = data.replace(/p /g,'p<br/>');
 						container.html(data);
 					  } else {
 						var errormsg = '<p>Error: could not load the page.</p>';
-						container.
-						  html(errormsg).
-							focus().
-							  effect('highlight',{color:'#c00'},1000);
+						container.html(errormsg);
 					  }
 					}
 				  );
@@ -74,18 +100,12 @@
 					url: url,
 					timeout:5000,
 					success: function(data){
-					  container.
-						html(data).
-						  focus().
-							effect("highlight",{},1000);
+					  container.html(data);
 					},
 					error: function(req,error){
 					  if(error === 'error'){error = req.statusText;}
 					  var errormsg = 'There was a communication error: '+error;
-						container.
-						  html(errormsg).
-							focus().
-							  effect('highlight',{color:'#c00'},1000);
+						container.html(errormsg);
 					},
 					beforeSend: function(data){
 					}
@@ -94,10 +114,10 @@
 			  }
 			  function filterData(data){
 				// filter all the nasties out
-				// no body tags
-				//data = data.replace(/<?\/body[^>]*>/g,'');
-				// no linebreaks
-				data = data.replace(/[\r|\n]+/g,'');
+				// no body tags, linebreaks, p tags
+				data = data.replace(/(<\/?body[^>]*>)|(<\/?p>)|([\r|\n]+)/g,'');
+				// decode ampersands
+				data = data.replace(/&amp;+/g,'&');
 				// no comments
 				data = data.replace(/<--[\S\s]*?-->/g,'');
 				// no noscript blocks
@@ -106,8 +126,9 @@
 				data = data.replace(/<script[^>]*>[\S\s]*?<\/script>/g,'');
 				// no self closing scripts
 				data = data.replace(/<script.*\/>/,'');
-				// [... add as needed ...]
 				return data;
+			  }
+			  function makeObject(data){
 			  }
 			});	
         </script>
@@ -117,9 +138,6 @@
         <g:background id="imgBackground">
             <div id="gadgetContent">
 				<div id="target"></div>
-				<!--
-				<div class="copyright">&copy;2011 <a href="http://tricari.co/">Joseph Tricarico</a></div>
-				-->
 			</div>
         </g:background>
     </body>
