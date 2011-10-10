@@ -53,7 +53,6 @@
 			function init()
             {
                 var oBackground = document.getElementById("imgBackground");
-				// Enable Settings dialog for the gadget. 
 				System.Gadget.settingsUI = "settings.html";
                 //oBackground.src = "url(images/septa.gif)";
             }
@@ -145,19 +144,16 @@
 				return data;
 			  }
 			  smsUpdate = function(smsStops) {
-			  //TODO
 				for(x in smsStops) {
 					//check if div element exists, otherwise append one with a unique name
 					if($('#sms-'+smsStops[x]).length===0) {
-						//make that container!
-						$('#target').prepend('<div id="sms-'+smsStops[x]+'"></div>');
+						$('#target').append('<div id="sms-'+smsStops[x]+'"></div>');//make that container!
 					}
 					var container = $('#sms-'+smsStops[x]);
 					container.attr('tabIndex','-1');
 					doAjaxSms(smsStops[x],container);
 				}
 			  }
-			  
 			  //initialize page
 			  var smsStops = [18393,2];
 			  smsUpdate(smsStops);
