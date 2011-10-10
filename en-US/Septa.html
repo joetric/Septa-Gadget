@@ -7,7 +7,7 @@
         {
             margin: 0;
             width: 130px;
-            height: 200px;
+            height: 160px;
             font-family: verdana;
             font-size: 11px;
 			color:#333;
@@ -60,8 +60,9 @@
 			
 			$( function() {
 			  //JSON functions derived from code by Christian Heilmann.
-			  function doAjax(url,msg,container){
+			  function doAjaxSms(stop,container){
 				// if the URL starts with http
+				url = 'http://www3.septa.org/sms/'+stop;
 				if(url.match('^http')){
 				  // assemble the YQL call
 				  encodedCall = "http://query.yahooapis.com/v1/public/yql?"+
@@ -103,7 +104,7 @@
 						if( timeoutMs < 120000 ) {
 							timeoutMs = 120000; //make 2 minutes the minimum refresh time
 						}
-						setTimeout("update();", timeoutMs);//set timeout / convert hours to ms, less 5 min
+						setTimeout("updateSms(" + stop + ");", timeoutMs);//set timeout / convert hours to ms, less 5 min
 					  } else {
 						var errormsg = '<p>Error: could not load the page.</p>';
 						container.html(errormsg);
@@ -143,14 +144,23 @@
 				data = data.replace(/<script.*\/>/,'');
 				return data;
 			  }
-			  update = function() {
-			    var container = $('#target');
-			    container.attr('tabIndex','-1');
-				var url = 'http://www3.septa.org/sms/2';
-				var msg = '';
-				doAjax(url,msg,container);
+			  smsUpdate = function(smsStops) {
+			  //TODO
+				for(x in smsStops) {
+					//check if div element exists, otherwise append one with a unique name
+					if($('#sms-'+smsStops[x]).length===0) {
+						//make that container!
+						$('#target').prepend('<div id="sms-'+smsStops[x]+'"></div>');
+					}
+					var container = $('#sms-'+smsStops[x]);
+					container.attr('tabIndex','-1');
+					doAjaxSms(smsStops[x],container);
+				}
 			  }
-			  update();
+			  
+			  //initialize page
+			  var smsStops = [18393,2];
+			  smsUpdate(smsStops);
 			});	
         </script>
     </head>
