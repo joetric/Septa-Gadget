@@ -19,7 +19,8 @@
 			height:100%;
             vertical-align: middle;
             text-align: left;
-            overflow: hidden;
+            overflow-x: hidden;
+			overflow-y: auto;
 			background: white;
 			text-align:center;
         }
@@ -52,6 +53,8 @@
 			function init()
             {
                 var oBackground = document.getElementById("imgBackground");
+				// Enable Settings dialog for the gadget. 
+				System.Gadget.settingsUI = "settings.html";
                 //oBackground.src = "url(images/septa.gif)";
             }
 			

@@ -7,7 +7,7 @@
 
   <!-- Base defines the domain and base path of the endpoint -->
   <resources base="http://www3.septa.org">
-    <resource path="/api/nta/{origin}/{destination}">
+    <resource path="/api/nta/{origin}/{destination}/{limit}">
       <!-- Resources that are the same but have multiple verbs can have multiple method items in the WADL. -->
       <!-- Methods should each have a unique id. -->
       <!-- The attribute displayName can be used to control the name that appears in the list in the Console. -->
@@ -16,6 +16,9 @@
       </param>
 	  <param name="destination" required="true" type="xsd:string" style="template">
         <doc>Destination</doc>
+      </param>
+	  <param name="limit" required="false" type="xsd:string" style="template">
+        <doc>Maximum number of results</doc>
       </param>
 	  
 	  <method id="nta" name="GET" apigee:displayName="Next to Arrive">

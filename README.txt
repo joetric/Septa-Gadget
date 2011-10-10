@@ -11,5 +11,5 @@ Please feel free to contact me:
 Joe Tricarico
 jtricarico@azavea.com
 
-* This is one of my personal projects and is not
-supported by Azavea, Inc.
+Please note that this is one of my personal projects
+and is not supported by Azavea, Inc.
