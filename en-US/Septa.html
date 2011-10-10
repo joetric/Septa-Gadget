@@ -10,6 +10,7 @@
             height: 200px;
             font-family: verdana;
             font-size: 11px;
+			color:#333;
         }
         #gadgetContent
         {
@@ -20,6 +21,7 @@
             text-align: left;
             overflow: hidden;
 			background: white;
+			text-align:center;
         }
 		.copyright
 		{
@@ -29,7 +31,7 @@
 		{
 			font-size:11px;
 			display:block;
-			background:black;
+			background:#333;
 			width:100%;
 			color:white;
 			padding:2px;
@@ -38,7 +40,8 @@
 		}
 		h4{
 			font-size:11px;
-			margin:6px 0 0;
+			margin:6px 5px 2px;
+			border-bottom:1px solid #333;
 		}
 		
         </style>
@@ -53,18 +56,7 @@
             }
 			
 			$( function() {
-			  update = function() {
-			    var container = $('#target');
-			    container.attr('tabIndex','-1');
-				var url = 'http://www3.septa.org/sms/2';
-				var msg = '';
-				doAjax(url,msg,container);
-				//set delay to update again
-				//setTimeout("update();",1800000);//30 mins for now
-			  }
-			  update();
-			  
-			  //JSON functions written by Christian Heilmann.
+			  //JSON functions derived from code by Christian Heilmann.
 			  function doAjax(url,msg,container){
 				// if the URL starts with http
 				if(url.match('^http')){
@@ -89,6 +81,22 @@
 						data = data.replace(/a /g,'a<br/>');
 						data = data.replace(/p /g,'p<br/>');
 						container.html(data);
+						var lastTime = /[0-9:]+(a|p)[^@]*$/g.exec(data);
+						lastTime = lastTime[0].replace(/(<br\/?>)/g, '');
+						var a_or_p = lastTime.substr(lastTime.length-2,1);
+						var m = parseInt(lastTime.substr(lastTime.length-4,2));
+						var h = parseInt(lastTime.substr(0,lastTime.length-5));
+						if(a_or_p == 'p') {
+							var h = h+12;
+						}
+						lastBus = h + m/60;
+						d = new Date();
+						now = d.getHours() + d.getMinutes()/60;
+						//if lastBus is less than current time, it's the next day, so add 24h to current time
+						if( lastBus < now ) {
+							lastBus = lastBus + 24;
+						}
+						setTimeout("update();", 3600000*(lastBus - now) );//set timeout / convert hours to ms, less 5 min
 					  } else {
 						var errormsg = '<p>Error: could not load the page.</p>';
 						container.html(errormsg);
@@ -128,8 +136,14 @@
 				data = data.replace(/<script.*\/>/,'');
 				return data;
 			  }
-			  function makeObject(data){
+			  update = function() {
+			    var container = $('#target');
+			    container.attr('tabIndex','-1');
+				var url = 'http://www3.septa.org/sms/2';
+				var msg = '';
+				doAjax(url,msg,container);
 			  }
+			  update();
 			});	
         </script>
     </head>
