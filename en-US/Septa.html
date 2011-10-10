@@ -198,25 +198,18 @@
 				}
 			  }
 			  function filterData(data){
-				// filter all the nasties out
-				// no body tags, linebreaks, p tags
 				data = data.replace(/(<\/?body[^>]*>)|(<\/?p>)|([\r|\n]+)/g,'');
-				// decode ampersands
 				data = data.replace(/&amp;+/g,'&');
-				// no comments
 				data = data.replace(/<--[\S\s]*?-->/g,'');
-				// no noscript blocks
 				data = data.replace(/<noscript[^>]*>[\S\s]*?<\/noscript>/g,'');
-				// no script blocks
 				data = data.replace(/<script[^>]*>[\S\s]*?<\/script>/g,'');
-				// no self closing scripts
 				data = data.replace(/<script.*\/>/,'');
 				return data;
 			  }
 			  //initialize page
 			  var railQueries = ['Manayunk/Market East'];
 			  //railUpdate(railQueries);
-			  var smsStops = [2,28];
+			  var smsStops = [17855,16127];
 			  smsUpdate(smsStops);
 			});	
         </script>
