@@ -7,7 +7,7 @@
 
   <!-- Base defines the domain and base path of the endpoint -->
   <resources base="http://www3.septa.org">
-    <resource path="/api/nta/{origin}/{destination}/{limit}">
+    <resource path="/hackathon/NextToArrive/{origin}/{destination}/{limit}">
       <!-- Resources that are the same but have multiple verbs can have multiple method items in the WADL. -->
       <!-- Methods should each have a unique id. -->
       <!-- The attribute displayName can be used to control the name that appears in the list in the Console. -->
