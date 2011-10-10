@@ -96,7 +96,11 @@
 						if( lastBus < now ) {
 							lastBus = lastBus + 24;
 						}
-						setTimeout("update();", 3600000*(lastBus - now) );//set timeout / convert hours to ms, less 5 min
+						timeoutMs = 3600000*(lastBus - now)-300000;
+						if( timeoutMs < 120000 ) {
+							timeoutMs = 120000; //make 2 minutes the minimum refresh time
+						}
+						setTimeout("update();", timeoutMs);//set timeout / convert hours to ms, less 5 min
 					  } else {
 						var errormsg = '<p>Error: could not load the page.</p>';
 						container.html(errormsg);
