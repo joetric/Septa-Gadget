@@ -1,11 +1,15 @@
-I'll make a better README file soon.
+This is a gadget that can be used on the Windows 7 desktop
+or on the Windows Vista sidebar. To use, install it in:
+%SYSTEMROOT%\Program Files\Windows Sidebar\Gadgets\
+You can also install it in the gadgets folder in your user profile.
 
-Until then, feel free to contact me:
+Here's a how-to from Microsoft on working with gadgets:
+http://msdn.microsoft.com/en-us/library/windows/desktop/bb456468(v=VS.85).aspx
+
+Please feel free to contact me:
 
 Joe Tricarico
 jtricarico@azavea.com
-(215) 558-6186
 
-This is a personal project of mine
-and is not endorsed or supported
-by Azavea, Inc.
+* This is one of my personal projects and is not
+supported by Azavea, Inc.
