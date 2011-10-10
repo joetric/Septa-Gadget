@@ -65,9 +65,9 @@
 					//check if div element exists, otherwise append one with a unique name
 					if($('#sms-'+smsStops[x]).length===0) {
 						$('#target').append('<div id="sms-'+smsStops[x]+'">&nbsp;</div>');
+						$('#sms-'+smsStops[x]).attr('tabIndex','-1');
 					}
 					var container = $('#sms-'+smsStops[x]);
-					container.attr('tabIndex','-1');
 					doAjaxSms(smsStops[x],container);
 				}
 			  }
@@ -84,6 +84,7 @@
 				}
 			  }
 			  //JSON functions derived from code by Christian Heilmann.
+			  /*
 			  function doAjaxRail(query,container){
 				// if the URL starts with http
 				url = 'http://www3.septa.org/hackathon/NextToArrive/'+query;
@@ -125,7 +126,8 @@
 				  });
 				}
 			  }
-			  function doAjaxSms(stop,container){
+			  */
+			  doAjaxSms = function(stop,container){
 				// if the URL starts with http
 				url = 'http://www3.septa.org/sms/'+stop;
 				if(url.match('^http')){
@@ -146,25 +148,32 @@
 						firstFound = pattCloseTitle.exec(data);
 						data = data.replace(pattCloseTitle,'</h3>\n<div class="details">'+firstFound).replace(/Inbound/g,'<h4>Inbound</h4>').replace(/Outbound/g,'<h4>Outbound</h4>').replace(/a /g,'a<br/>').replace(/p /g,'p<br/>')+'</div>';
 						container.html(data);//update div
-						var lastTime = /[0-9:]+(a|p)[^@]*$/g.exec(data);
-						lastTime = lastTime[0].replace(/(<br\/?>)/g, '');
-						var a_or_p = lastTime.substr(lastTime.length-2,1);
-						var m = parseInt(lastTime.substr(lastTime.length-4,2));
-						var h = parseInt(lastTime.substr(0,lastTime.length-5));
-						if(a_or_p == 'p') {
-							var h = h+12;
+						lastTimeRE = / [0-9]{1,2}:[0-9]{2}[ap]/g;
+						while(lastTime = lastTimeRE.exec(data)) {
+							lastTime = lastTime[0];
+							var a_or_p = lastTime.substr(lastTime.length-1,1);
+							var m = parseInt(lastTime.substr(lastTime.length-3,2));
+							var h = parseInt(lastTime.substr(1,lastTime.length-4));
+							if(a_or_p == 'p') {
+								h = h+12;
+							}
+							h = h + m/60; //float h
+							d = new Date();
+							now = d.getHours() + d.getMinutes()/60;
+							if( now-h > 0.5 ) {//half-hour buffer
+								h = h + 24;//epoch is beginning of current day
+							}
+							if(refreshInt === undefined) {
+								var refreshInt = h-now;
+							}else if(h-now > refreshInt) {
+								refreshInt = h-now;
+							}
 						}
-						lastBus = h + m/60;
-						d = new Date();
-						now = d.getHours() + d.getMinutes()/60;
-						if( lastBus < now ) {
-							lastBus = lastBus + 24;//if lastBus is less than current time, it's the next day, so add 24h to current time
-						}
-						timeoutMs = 3600000*(lastBus - now)-300000;
+						timeoutMs = 3600000*(refreshInt)-300000;
 						if( timeoutMs < 120000 ) {
 							timeoutMs = 120000; //make 2 minutes the minimum refresh time
 						}
-						setTimeout("smsUpdate([" + stop + "]);", timeoutMs);
+						setTimeout("doAjaxSms(" + stop + ", $('#sms-" + stop + "'));", timeoutMs);
 					  } else {
 						var errormsg = '<p>Error: could not load the page.</p>';
 						container.html(errormsg);
@@ -206,7 +215,7 @@
 			  }
 			  //initialize page
 			  var railQueries = ['Manayunk/Market East'];
-			  railUpdate(railQueries);
+			  //railUpdate(railQueries);
 			  var smsStops = [2,28];
 			  smsUpdate(smsStops);
 			});	
