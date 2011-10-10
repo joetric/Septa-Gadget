@@ -44,21 +44,87 @@
 			margin:6px 5px 2px;
 			border-bottom:1px solid #333;
 		}
-		
+		.details{
+			margin-bottom:8px;
+		}
         </style>
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"></script>
         <script type="text/jscript" language="jscript">
-            // Initialize the gadget.
-            
+			//Gadget init
 			function init()
             {
                 var oBackground = document.getElementById("imgBackground");
 				System.Gadget.settingsUI = "settings.html";
                 //oBackground.src = "url(images/septa.gif)";
             }
-			
+			//jQuery init			
 			$( function() {
+			  //global function
+			  smsUpdate = function(smsStops) {
+				for(x in smsStops) {
+					//check if div element exists, otherwise append one with a unique name
+					if($('#sms-'+smsStops[x]).length===0) {
+						$('#target').append('<div id="sms-'+smsStops[x]+'">&nbsp;</div>');
+					}
+					var container = $('#sms-'+smsStops[x]);
+					container.attr('tabIndex','-1');
+					doAjaxSms(smsStops[x],container);
+				}
+			  }
+			  //global function
+			  railUpdate = function(railQueries) {
+				for(x in railQueries) {
+					//check if div element exists, otherwise append one with a unique name
+					if($('#rail-'+railQueries[x]).length===0) {
+						$('#target').append('<div id="rail-'+railQueries[x]+'">&nbsp;</div>');
+					}
+					var container = $('#rail-'+railQueries[x]);
+					container.attr('tabIndex','-1');
+					doAjaxRail(railQueries[x],container);
+				}
+			  }
 			  //JSON functions derived from code by Christian Heilmann.
+			  function doAjaxRail(query,container){
+				// if the URL starts with http
+				url = 'http://www3.septa.org/hackathon/NextToArrive/'+query;
+				if(url.match('^http')){
+				  // assemble the YQL call
+				  encodedCall = "http://query.yahooapis.com/v1/public/yql?"+
+							"q=select%20*%20from%20html%20where%20url%3D%22"+
+							encodeURIComponent(url)+
+							"%22&format=xml'&callback=?";
+				  $.getJSON("http://query.yahooapis.com/v1/public/yql?"+
+							"q=select%20*%20from%20html%20where%20url%3D%22"+
+							encodeURIComponent(url)+
+							"%22&format=xml'&callback=?",
+					function(data){
+					  if(data.results[0]){
+						var data = filterData(data.results[0]);
+						data = '<h3>Origin-Destination</h3><div class="details"></div>';
+						container.html(data);//update div
+					  } else {
+						var errormsg = '<p>Error: could not load the page.</p>';
+						container.html(errormsg);
+					  }
+					}
+				  );
+				} else {
+				  $.ajax({
+					url: url,
+					timeout:5000,
+					success: function(data){
+					  container.html(data);
+					},
+					error: function(req,error){
+					  if(error === 'error'){error = req.statusText;}
+					  var errormsg = 'There was a communication error: '+error;
+						container.html(errormsg);
+					},
+					beforeSend: function(data){
+					}
+				  });
+				}
+			  }
 			  function doAjaxSms(stop,container){
 				// if the URL starts with http
 				url = 'http://www3.septa.org/sms/'+stop;
@@ -78,12 +144,8 @@
 						data = "<h3>" + data;
 						pattCloseTitle = new RegExp("Outbound|Inbound|Rt.");
 						firstFound = pattCloseTitle.exec(data);
-						data = data.replace(pattCloseTitle,'</h3>\n' + firstFound);
-						data = data.replace(/Inbound/g,'<h4>Inbound</h4>');
-						data = data.replace(/Outbound/g,'<h4>Outbound</h4>');
-						data = data.replace(/a /g,'a<br/>');
-						data = data.replace(/p /g,'p<br/>');
-						container.html(data);
+						data = data.replace(pattCloseTitle,'</h3>\n<div class="details">'+firstFound).replace(/Inbound/g,'<h4>Inbound</h4>').replace(/Outbound/g,'<h4>Outbound</h4>').replace(/a /g,'a<br/>').replace(/p /g,'p<br/>')+'</div>';
+						container.html(data);//update div
 						var lastTime = /[0-9:]+(a|p)[^@]*$/g.exec(data);
 						lastTime = lastTime[0].replace(/(<br\/?>)/g, '');
 						var a_or_p = lastTime.substr(lastTime.length-2,1);
@@ -95,15 +157,14 @@
 						lastBus = h + m/60;
 						d = new Date();
 						now = d.getHours() + d.getMinutes()/60;
-						//if lastBus is less than current time, it's the next day, so add 24h to current time
 						if( lastBus < now ) {
-							lastBus = lastBus + 24;
+							lastBus = lastBus + 24;//if lastBus is less than current time, it's the next day, so add 24h to current time
 						}
 						timeoutMs = 3600000*(lastBus - now)-300000;
 						if( timeoutMs < 120000 ) {
 							timeoutMs = 120000; //make 2 minutes the minimum refresh time
 						}
-						setTimeout("updateSms(" + stop + ");", timeoutMs);//set timeout / convert hours to ms, less 5 min
+						setTimeout("smsUpdate([" + stop + "]);", timeoutMs);
 					  } else {
 						var errormsg = '<p>Error: could not load the page.</p>';
 						container.html(errormsg);
@@ -143,24 +204,14 @@
 				data = data.replace(/<script.*\/>/,'');
 				return data;
 			  }
-			  smsUpdate = function(smsStops) {
-				for(x in smsStops) {
-					//check if div element exists, otherwise append one with a unique name
-					if($('#sms-'+smsStops[x]).length===0) {
-						$('#target').append('<div id="sms-'+smsStops[x]+'"></div>');//make that container!
-					}
-					var container = $('#sms-'+smsStops[x]);
-					container.attr('tabIndex','-1');
-					doAjaxSms(smsStops[x],container);
-				}
-			  }
 			  //initialize page
-			  var smsStops = [18393,2];
+			  var railQueries = ['Manayunk/Market East'];
+			  railUpdate(railQueries);
+			  var smsStops = [2,28];
 			  smsUpdate(smsStops);
 			});	
         </script>
     </head>
-	
     <body onload="init()">
         <g:background id="imgBackground">
             <div id="gadgetContent">
