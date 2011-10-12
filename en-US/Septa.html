@@ -70,6 +70,7 @@
 						doAjaxSms(smsStops[x],container);
 					}
 				  }
+				  
 				  //global function
 				  railUpdate = function(railQueries) {
 					for(x in railQueries) {
@@ -85,39 +86,33 @@
 						//container.html('test');
 					}
 				  }
-				  //JSON functions derived from code by Christian Heilmann.
 				  
-				  function doAjaxRail(query,container){
+				  //JSON functions derived from code by Christian Heilmann.
+				  doAjaxRail = function(query,container){
 					// if the URL starts with http
 					url = 'http://www3.septa.org/hackathon/NextToArrive/'+query+'/2';
 					if(url.match('^http')){
 					  // assemble the YQL call
-						encodedCall = "http://query.yahooapis.com/v1/public/yql?"+
-								"q=select%20*%20from%20json%20where%20url%3D%22"+
-								encodeURIComponent(url)+
-								"%22&format=json";
-						//$.ajax(
-					  
-					  $.ajax(encodedCall,
-					  { requestType:'jsonp',
-						success: function(data){
-						  if(data){
-							output = '<h3>'+query+'</h3><div class="details">';
-							for(x in data.query.results.json.json) {
+					  encodedCall = "http://query.yahooapis.com/v1/public/yql?"+
+							"q=select%20*%20from%20json%20where%20url%3D%22"+
+							encodeURIComponent(url)+
+							"%22&format=json";
+					  $.ajax(encodedCall, {
+						dataType:'text',
+						success: function(data) {
+						    var obj = $.parseJSON(data);
+							alert(obj);
+							output = '<h3>'+query.replace(/%20/,' ').replace(/\//,' to ')+'</h3><div class="details">';
+							for(x in obj.query.results.json.json) {
 								output = output
-								+data.query.results.json.json[x].orig_train+' '
-								+data.query.results.json.json[x].orig_departure_time.replace(/AM/,'a').replace(/PM/,'p')+' '
-								+data.query.results.json.json[x].orig_delay+'<br/>'
+								//+obj.query.results.json.json[x].orig_train+' '
+								+obj.query.results.json.json[x].orig_departure_time.replace(/AM/,'a').replace(/PM/,'p')+' '
+								+obj.query.results.json.json[x].orig_delay+'<br/>'
 							}
 							output = output + '</div>';
 							container.html(output);//update div
-						  } else {
-							var errormsg = '<p>Error: could not load the page.</p>';
-							container.html(errormsg);
-						  }
 						}
 					  });
-					  
 					} else {
 					  container.text('test');
 					  $.ajax({
@@ -134,7 +129,6 @@
 						}
 					  });
 					}
-					
 				  }
 				  
 				  doAjaxSms = function(stop,container){
@@ -145,11 +139,8 @@
 					  encodedCall = "http://query.yahooapis.com/v1/public/yql?"+
 								"q=select%20*%20from%20html%20where%20url%3D%22"+
 								encodeURIComponent(url)+
-								"%22&format=xml'&callback=?";
-					  $.getJSON("http://query.yahooapis.com/v1/public/yql?"+
-								"q=select%20*%20from%20html%20where%20url%3D%22"+
-								encodeURIComponent(url)+
-								"%22&format=xml'&callback=?",
+								"%22&format=xml&callback=?";
+					  $.getJSON(encodedCall,
 						function(data){
 						  if(data.results[0]){
 							var data = filterData(data.results[0]);
@@ -188,8 +179,7 @@
 							var errormsg = '<p>Error: could not load the page.</p>';
 							container.html(errormsg);
 						  }
-						}
-					  );
+						});
 					} else {
 					  $.ajax({
 						url: url,
@@ -217,9 +207,9 @@
 					return data;
 				  }
 				  //initialize page
-				  var railQueries = ['Manayunk/Market%20East'];
+				  var railQueries = ['Market%20East/Manayunk'];
 				  railUpdate(railQueries);
-				  var smsStops = [17855,16127];
+				  var smsStops = [17855/*,16127*/];
 				  smsUpdate(smsStops);
 				});	
             }
