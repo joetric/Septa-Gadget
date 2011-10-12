@@ -54,7 +54,7 @@
 			function init()
             {
                 var oBackground = document.getElementById("imgBackground");
-				System.Gadget.settingsUI = "settings.html";
+				//System.Gadget.settingsUI = "settings.html";
                 //oBackground.src = "url(images/septa.gif)";
 				//jQuery init			
 				$( function() {
@@ -74,44 +74,56 @@
 				  railUpdate = function(railQueries) {
 					for(x in railQueries) {
 						//check if div element exists, otherwise append one with a unique name
-						if($('#rail-'+railQueries[x]).length===0) {
-							$('#target').append('<div id="rail-'+railQueries[x]+'">&nbsp;</div>');
+						//div_suffix = railQueries[x].replace(/[\/ ]/, '-');
+						div_suffix = x;
+						if($('#rail-'+div_suffix).length===0) {
+							$('#target').append('<div id="rail-'+div_suffix+'">&nbsp;</div>');
 						}
-						var container = $('#rail-'+railQueries[x]);
+						var container = $('#rail-'+div_suffix );
 						container.attr('tabIndex','-1');
 						doAjaxRail(railQueries[x],container);
+						//container.html('test');
 					}
 				  }
 				  //JSON functions derived from code by Christian Heilmann.
-				  /*
+				  
 				  function doAjaxRail(query,container){
 					// if the URL starts with http
-					url = 'http://www3.septa.org/hackathon/NextToArrive/'+query;
+					url = 'http://www3.septa.org/hackathon/NextToArrive/'+query+'/2';
 					if(url.match('^http')){
 					  // assemble the YQL call
-					  encodedCall = "http://query.yahooapis.com/v1/public/yql?"+
-								"q=select%20*%20from%20html%20where%20url%3D%22"+
+						encodedCall = "http://query.yahooapis.com/v1/public/yql?"+
+								"q=select%20*%20from%20json%20where%20url%3D%22"+
 								encodeURIComponent(url)+
-								"%22&format=xml'&callback=?";
-					  $.getJSON("http://query.yahooapis.com/v1/public/yql?"+
-								"q=select%20*%20from%20html%20where%20url%3D%22"+
-								encodeURIComponent(url)+
-								"%22&format=xml'&callback=?",
-						function(data){
-						  if(data.results[0]){
-							var data = filterData(data.results[0]);
-							data = '<h3>Origin-Destination</h3><div class="details"></div>';
-							container.html(data);//update div
+								"%22&format=json";
+						//$.ajax(
+					  
+					  $.ajax(encodedCall,
+					  { requestType:'jsonp',
+						success: function(data){
+						  if(data){
+							output = '<h3>'+query+'</h3><div class="details">';
+							for(x in data.query.results.json.json) {
+								output = output
+								+data.query.results.json.json[x].orig_train+' '
+								+data.query.results.json.json[x].orig_departure_time.replace(/AM/,'a').replace(/PM/,'p')+' '
+								+data.query.results.json.json[x].orig_delay+'<br/>'
+							}
+							output = output + '</div>';
+							container.html(output);//update div
 						  } else {
 							var errormsg = '<p>Error: could not load the page.</p>';
 							container.html(errormsg);
 						  }
 						}
-					  );
+					  });
+					  
 					} else {
+					  container.text('test');
 					  $.ajax({
-						url: url,
+						url: encodedCall,
 						timeout:5000,
+						requestType:'jsonp',
 						success: function(data){
 						  container.html(data);
 						},
@@ -119,13 +131,12 @@
 						  if(error === 'error'){error = req.statusText;}
 						  var errormsg = 'There was a communication error: '+error;
 							container.html(errormsg);
-						},
-						beforeSend: function(data){
 						}
 					  });
 					}
+					
 				  }
-				  */
+				  
 				  doAjaxSms = function(stop,container){
 					// if the URL starts with http
 					url = 'http://www3.septa.org/sms/'+stop;
@@ -206,8 +217,8 @@
 					return data;
 				  }
 				  //initialize page
-				  var railQueries = ['Manayunk/Market East'];
-				  //railUpdate(railQueries);
+				  var railQueries = ['Manayunk/Market%20East'];
+				  railUpdate(railQueries);
 				  var smsStops = [17855,16127];
 				  smsUpdate(smsStops);
 				});	
