@@ -94,12 +94,13 @@
 					if(url.match('^http')){
 					  // assemble the YQL call
 					  encodedCall = "http://query.yahooapis.com/v1/public/yql?"+
-							"q=select%20*%20from%20json%20where%20url%3D%22"+
+							"q=select%20*%20from%20html%20where%20url%3D%22"+
 							encodeURIComponent(url)+
-							"%22&format=json";
+							"%22&format=xml";
 					  $.ajax(encodedCall, {
-						dataType:'text',
+						//dataType:'text',
 						success: function(data) {
+							alert(data.results[0]);/*
 						    var obj = $.parseJSON(data);
 							alert(obj);
 							output = '<h3>'+query.replace(/%20/,' ').replace(/\//,' to ')+'</h3><div class="details">';
@@ -111,6 +112,7 @@
 							}
 							output = output + '</div>';
 							container.html(output);//update div
+							*/
 						}
 					  });
 					} else {
