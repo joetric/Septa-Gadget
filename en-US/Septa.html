@@ -3,19 +3,17 @@
         <meta http-equiv="Content-Type" content="text/html; charset=Unicode" />
         <title>SEPTA Arrivals</title>
         <style type="text/css">
-        body
-        {
+        body{
             margin: 0;
-            width: 130px;
+            width: 150px;
             height: 160px;
             font-family: verdana;
             font-size: 11px;
 			color:#333;
         }
-        #gadgetContent
-        {
+        #gadgetContent      {
             /*margin-top: 20px;*/
-            width: 130px;
+            width: 100%;
 			height:100%;
             vertical-align: middle;
             text-align: left;
@@ -24,12 +22,10 @@
 			background: white;
 			text-align:center;
         }
-		.copyright
-		{
+		.copyright{
 			font-size: 9px;
 		}
-		h3
-		{
+		h3{
 			font-size:11px;
 			display:block;
 			background:#333;
@@ -49,8 +45,13 @@
 		}
 		.railRow{
 			color:#fff;
-			padding-bottom:2px;
+			padding:1px 0;
 			border-top:1px solid #fff;
+			background-color:#000;
+		}
+		.late{
+			color:#000;
+			background-color:yellow;
 		}
         </style>
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"></script>
@@ -98,6 +99,7 @@
 					"Chestnut Hill West":"00B4B2",
 					"Lansdale/Doylestown":"775B49",
 					"Media/Elwyn":"007CC8",
+					"Media/Elywn":"007CC8",
 					"Fox Chase":"FF823D",
 					"Manayunk/Norristown":"EE4C69",
 					"Paoli/Thorndale":"20825C",
@@ -111,7 +113,7 @@
 				  //JSON functions derived from code by Christian Heilmann.
 				  doAjaxRail = function(query,container){
 					// if the URL starts with http
-					url = 'http://www3.septa.org/hackathon/NextToArrive/'+query+'/2';
+					url = 'http://www3.septa.org/hackathon/NextToArrive/'+query+'/4';
 					if(url.match('^http')){
 					  // assemble the YQL call
 					  encodedCall = "http://query.yahooapis.com/v1/public/yql?"+
@@ -122,15 +124,19 @@
 					  $.getJSON(encodedCall,
 						function(data){
 						  if(data.results[0]){
-							output = '<h3>'+query.replace(/%20/,' ').replace(/\//,' to ')+'</h3><div class="details">';
+							output = '<h3>'+query.replace(/%20/g,' ').replace(/\//,' to ')+'</h3><div class="details">';
 							var data = filterData(data.results[0]);
 							var obj = $.parseJSON(data);
 							for(x in obj) {
+								obj[x].orig_delay = obj[x].orig_delay.replace(/ mins?/, 'm late');
+								if( /\d+/.exec(obj[x].orig_delay) > 5 ) {
+									obj[x].orig_delay = '<span class="late">' + obj[x].orig_delay + '</span>';
+								}
 								output = output
 								+'<div class="railRow" style="background-color:#'+railColors[obj[x].orig_line] + '">'
 								+obj[x].orig_train+' '
 								+obj[x].orig_departure_time.replace(/AM/,'a').replace(/PM/,'p')+' '
-								+obj[x].orig_delay.replace(/ mins?/, 'm late')+'</div>';
+								+obj[x].orig_delay+'</div>';
 							}
 							container.html(output+'</div>');//update div
 							setTimeout("doAjaxRail('" + query + "', $('#" + container.attr('id') + "'));", 60000); //refreshes every min
@@ -234,9 +240,9 @@
 					return data;
 				  }
 				  //initialize page
-				  var railQueries = ['Market%20East/Manayunk'];
+				  var railQueries = ['Market%20East/Manayunk', 'Market%20East/30th%20Street%20Station'];
 				  railUpdate(railQueries);
-				  var smsStops = [17855/*,16127*/];
+				  var smsStops = [17855,16127];
 				  smsUpdate(smsStops);
 				});	
             }
