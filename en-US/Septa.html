@@ -45,7 +45,12 @@
 			border-bottom:1px solid #333;
 		}
 		.details{
-			margin-bottom:8px;
+			margin-bottom:1px;
+		}
+		.railRow{
+			color:#fff;
+			padding-bottom:2px;
+			border-top:1px solid #fff;
 		}
         </style>
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"></script>
@@ -87,6 +92,22 @@
 					}
 				  }
 				  
+				  railColors = {
+				    "Airport":"91456C",
+					"Chestnut Hill East":"94763C",
+					"Chestnut Hill West":"00B4B2",
+					"Lansdale/Doylestown":"775B49",
+					"Media/Elwyn":"007CC8",
+					"Fox Chase":"FF823D",
+					"Manayunk/Norristown":"EE4C69",
+					"Paoli/Thorndale":"20825C",
+					"Cynwyd":"6F549E",
+					"Trenton":"F683C9",
+					"Warminster":"F7AF42",
+					"Wilmington/Newark":"8AD16B",
+					"West Trenton":"5D5EBC"
+				  };
+				  
 				  //JSON functions derived from code by Christian Heilmann.
 				  doAjaxRail = function(query,container){
 					// if the URL starts with http
@@ -97,6 +118,7 @@
 							"q=select%20*%20from%20html%20where%20url%3D%22"+
 							encodeURIComponent(url)+
 							"%22&format=xml&callback=?";
+					  container.html('Loading...');
 					  $.getJSON(encodedCall,
 						function(data){
 						  if(data.results[0]){
@@ -104,13 +126,15 @@
 							var data = filterData(data.results[0]);
 							var obj = $.parseJSON(data);
 							for(x in obj) {
-								//+obj.query.results.json.json[x].orig_train+' '
 								output = output
+								+'<div class="railRow" style="background-color:#'+railColors[obj[x].orig_line] + '">'
+								+obj[x].orig_train+' '
 								+obj[x].orig_departure_time.replace(/AM/,'a').replace(/PM/,'p')+' '
-								+obj[x].orig_delay.replace(/ mins?/, 'm late')+'<br/>';
+								+obj[x].orig_delay.replace(/ mins?/, 'm late')+'</div>';
 							}
 							container.html(output+'</div>');//update div
-							setTimeout("doAjaxRail(" + query + ", $('" + container.attr('id') + "'));", 60000);
+							setTimeout("doAjaxRail('" + query + "', $('#" + container.attr('id') + "'));", 60000); //refreshes every min
+							
 						  } else {
 							var errormsg = '<p>Error: could not load the page.</p>';
 							container.html(errormsg);
@@ -223,6 +247,7 @@
         <g:background id="imgBackground">
             <div id="gadgetContent">
 				<div id="target"></div>
+				<!--<img src="images/powered_by_yahoo.gif"/>-->
 			</div>
         </g:background>
     </body>
