@@ -96,25 +96,26 @@
 					  encodedCall = "http://query.yahooapis.com/v1/public/yql?"+
 							"q=select%20*%20from%20html%20where%20url%3D%22"+
 							encodeURIComponent(url)+
-							"%22&format=xml";
-					  $.ajax(encodedCall, {
-						//dataType:'text',
-						success: function(data) {
-							alert(data.results[0]);/*
-						    var obj = $.parseJSON(data);
-							alert(obj);
+							"%22&format=xml&callback=?";
+					  $.getJSON(encodedCall,
+						function(data){
+						  if(data.results[0]){
 							output = '<h3>'+query.replace(/%20/,' ').replace(/\//,' to ')+'</h3><div class="details">';
-							for(x in obj.query.results.json.json) {
-								output = output
+							var data = filterData(data.results[0]);
+							var obj = $.parseJSON(data);
+							for(x in obj) {
 								//+obj.query.results.json.json[x].orig_train+' '
-								+obj.query.results.json.json[x].orig_departure_time.replace(/AM/,'a').replace(/PM/,'p')+' '
-								+obj.query.results.json.json[x].orig_delay+'<br/>'
+								output = output
+								+obj[x].orig_departure_time.replace(/AM/,'a').replace(/PM/,'p')+' '
+								+obj[x].orig_delay+'<br/>';
 							}
-							output = output + '</div>';
-							container.html(output);//update div
-							*/
-						}
-					  });
+							container.html(output+'</div>');//update div
+							setTimeout("doAjaxRail(" + query + ", $('" + container.attr('id') + "'));", 60000);
+						  } else {
+							var errormsg = '<p>Error: could not load the page.</p>';
+							container.html(errormsg);
+						  }
+						});
 					} else {
 					  container.text('test');
 					  $.ajax({
