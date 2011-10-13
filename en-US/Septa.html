@@ -107,7 +107,7 @@
 								//+obj.query.results.json.json[x].orig_train+' '
 								output = output
 								+obj[x].orig_departure_time.replace(/AM/,'a').replace(/PM/,'p')+' '
-								+obj[x].orig_delay+'<br/>';
+								+obj[x].orig_delay.replace(/ mins?/, 'm late')+'<br/>';
 							}
 							container.html(output+'</div>');//update div
 							setTimeout("doAjaxRail(" + query + ", $('" + container.attr('id') + "'));", 60000);
