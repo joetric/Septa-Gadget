@@ -49,6 +49,11 @@
 			border-top:1px solid #fff;
 			background-color:#000;
 		}
+		.railRow a{
+			color:white;
+			text-decoration:none;
+			border-bottom:1px dashed #fff;
+		}
 		.late{
 			color:#000;
 			background-color:yellow;
@@ -152,8 +157,13 @@
 								}
 								output = output
 								+'<div class="railRow" style="background-color:#'+railColors[obj[x].orig_line] + '">'
-								+obj[x].orig_train+' '
-								+obj[x].orig_departure_time.replace(/AM/,'a').replace(/PM/,'p')+' '
+								+'<a href="#" onClick="return false;" title="'
+								+obj[x].orig_line+'">'+obj[x].orig_train
+								+'</a> '
+								+'<a href="#" onClick="return false;" title="Scheduled to arrive at '
+								+obj[x].orig_arrival_time.replace(/AM/,'a').replace(/PM/,'p')+'">'
+								+obj[x].orig_departure_time.replace(/AM/,'a').replace(/PM/,'p')
+								+'</a> '
 								+obj[x].orig_delay+'</div>';
 							}
 							container.html(output+'</div></div>');//update div
@@ -259,7 +269,7 @@
 					return data;
 				  }
 				  //initialize page
-				  var railQueries = ['Market%20East/Manayunk', 'Market%20East/30th%20Street%20Station'];
+				  var railQueries = ['Market%20East/Media'];
 				  railUpdate(railQueries);
 				  var smsStops = [17855,16127];
 				  smsUpdate(smsStops);
